@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CCIE Security — Futuristic CTF Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: radial-gradient(circle at top left, #050510, #0a0f1c 60%);
+  --panel: rgba(15, 20, 40, 0.95);
+  --accent: #3df5c0;
+  --accent2: #6ae3ff;
+  --accent3: #ff3bfa;
+  --text: #e6f7ff;
+  --muted: #97a1b8;
+  --danger: #ff4b6e;
+  --success: #55f58d;
+  --font: 'Inter', sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+.grid {
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(rgba(0,255,255,0.05) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(255,0,255,0.05) 1px,transparent 1px);
+  background-size: 28px 28px;
+  z-index: 0;
+  pointer-events: none;
+  animation: gridGlow 8s linear infinite;
+}
+@keyframes gridGlow {
+  0% {opacity:0.3;}
+  50% {opacity:0.7;}
+  100% {opacity:0.3;}
+}
+.container {
+  display: flex;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+.sidebar {
+  width: 280px;
+  background: var(--panel);
+  padding: 20px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 15px rgba(0,255,255,0.2);
+  overflow-y: auto;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.brand .logo {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,var(--accent3),var(--accent));
+  box-shadow: 0 0 20px var(--accent3);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 22px;
+  color: #000;
+  margin-right: 12px;
+}
+.brand h1 {
+  font-size: 16px;
+  margin: 0;
+  color: var(--accent2);
+  text-shadow: 0 0 6px var(--accent2);
+}
+.lead { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+.quizArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+}
+.question {
+  background: rgba(20,20,40,0.85);
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid var(--accent2);
+  box-shadow: 0 0 12px rgba(0,255,255,0.3);
+  transition: transform 0.2s ease;
+}
+.question:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0,255,255,0.6);
+}
+.question h2 {
+  font-size: 16px;
+  margin: 0 0 12px;
+  color: var(--accent2);
+  text-shadow: 0 0 6px var(--accent2);
+}
+.options label {
+  display: block;
+  margin-bottom: 8px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.02);
+  transition: all .2s ease;
+}
+.options label:hover {
+  background: rgba(0,255,255,0.1);
+  box-shadow: 0 0 8px rgba(0,255,255,0.4);
+}
+.btnSubmit {
+  background: linear-gradient(90deg,var(--accent),var(--accent2));
+  border: none;
+  color: #000;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 14px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all .15s ease;
+  box-shadow: 0 0 12px var(--accent2);
+}
+.btnSubmit:hover {
+  transform: scale(1.07);
+  box-shadow: 0 0 24px var(--accent);
+}
+.timerBox {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  text-align: center;
+  color: var(--accent);
+  box-shadow: 0 0 12px rgba(0,255,255,0.4);
+  transition: all 0.4s ease;
+}
+.timerWarning {
+  color: #ff3b3b;
+  background: rgba(255,0,0,0.15);
+  animation: pulse 1s infinite;
+  text-shadow: 0 0 8px red;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 6px rgba(255,0,0,0.4);}
+  50% { box-shadow: 0 0 22px rgba(255,0,0,1);}
+  100%{ box-shadow: 0 0 6px rgba(255,0,0,0.4);}
+}
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.95);
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column;
+  z-index: 10;
+  text-align: center;
+  padding: 20px;
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent2);
+}
+.overlay.active { display: flex; }
+.flag {
+  margin-top: 20px;
+  font-size: 22px;
+  color: var(--accent3);
+  text-shadow: 0 0 12px var(--accent3), 0 0 20px var(--accent3);
+  animation: glowFlag 2s ease-in-out infinite alternate;
+}
+@keyframes glowFlag {
+  from { text-shadow: 0 0 12px var(--accent3),0 0 25px var(--accent3);}
+  to { text-shadow: 0 0 25px #fff,0 0 40px var(--accent3);}
+}
+</style>
+</head>
+<body>
+<div class="grid"></div>
+
+<div class="container">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">CS</div>
+      <div>
+        <h1>CCIE Security CTF</h1>
+        <p class="lead">30 Qs — Passing: 90% · Timer: 25:00</p>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Session</div>
+      <div style="display:flex;justify-content:space-between;">
+        <div>
+          <div style="font-size:12px;color:var(--muted)">Answered</div>
+          <div id="answeredCount" style="font-weight:700">0</div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--muted)">Remaining</div>
+          <div id="remainingCount" style="font-weight:700">30</div>
+        </div>
+      </div>
+      <div class="timerBox" id="timerBox">25:00</div>
+    </div>
+    <p class="lead">Right-click & Ctrl+L disabled. Auto-submit on timeout.</p>
+  </aside>
+
+  <main class="quizArea" id="quizArea">
+    <!-- Questions will be inserted here by JS -->
+    <button class="btnSubmit" onclick="finalizeResults()">Submit Quiz</button>
+  </main>
+</div>
+
+<div class="overlay" id="resultOverlay">
+  <h2 id="scoreText">Your Score:</h2>
+  <div id="flagText" class="flag"></div>
+</div>
+
+<script>
+const questions = [
+  {q:"Which AAA protocol uses UDP and is widely supported?",options:["RADIUS","TACACS+","Kerberos","Diameter"],answer:0},
+  {q:"Which Cisco feature provides antispoofing via reverse path forwarding?",options:["uRPF","IPS","ZBFW","AMP"],answer:0},
+  {q:"DMVPN Phase 3 allows what benefit?",options:["Split tunneling","Spoke-to-spoke tunnels","Dual encryption","PKI integration"],answer:1},
+  {q:"What protocol is used by Cisco Firepower for event export?",options:["NetFlow","sFlow","IPFIX","None of these"],answer:3},
+  {q:"Which is more secure: SSL or TLS?",options:["SSL","TLS","Both equal","Neither"],answer:1},
+  {q:"Cisco ISE uses what model for policies?",options:["ACLs","Role-based access control","Static routing","802.1q VLANs"],answer:1},
+  {q:"What open source IDS is integrated in Firepower?",options:["Snort IPS","Bro","Suricata","OSSEC"],answer:0},
+  {q:"Cisco Jabber uses which protocol for messaging?",options:["XMPP","SIP","H.323","MGCP"],answer:0},
+  {q:"Which hashing is used in IKEv2 by default?",options:["MD5","SHA-256","SHA-1","AES"],answer:1},
+  {q:"Best VPN protocol for site-to-site tunnels in Cisco devices?",options:["IKEv2","GRE","L2TP","PPTP"],answer:0},
+  {q:"TACACS+ default port?",options:["49","1812","22","443"],answer:0},
+  {q:"Cisco ASA places unknown traffic into which zone?",options:["DMZ","Default","Untrust","Quarantine"],answer:1},
+  {q:"What’s a best practice with SSL VPNs?",options:["Avoid UDP","Avoid TCP over TCP","Avoid split DNS","Avoid DTLS"],answer:1},
+  {q:"TrustSec uses what to tag packets?",options:["SGT","VLAN","IP Precedence","QoS"],answer:0},
+  {q:"Max VLANs in 802.1Q?",options:["100","512","250","4096"],answer:3},
+  {q:"What Cisco feature verifies SLA probes?",options:["SPAN","ERSPAN","IP SLA","NetFlow"],answer:2},
+  {q:"Cisco AMP integrates with what cloud malware analysis?",options:["Talos","Threat Grid","Splunk","Umbrella"],answer:1},
+  {q:"Firepower fastpath does what?",options:["Encrypt","Drop/fast-path traffic","Inspect SSL","Learn MACs"],answer:1},
+  {q:"Which Cisco tech is designed for software-defined segmentation?",options:["TrustSec","DMVPN","FlexVPN","EasyVPN"],answer:0},
+  {q:"Cisco WLC anchor mobility is used for?",options:["Roaming","Authentication","Mobility","RADIUS"],answer:2},
+  {q:"Cisco MFA solution is?",options:["Okta","Duo Security","Auth0","Ping"],answer:1},
+  {q:"TrustSec enforcement requires?",options:["Only ASA","TrustSec-capable router","NAT device","GRE tunnel"],answer:1},
+  {q:"Cisco malware protection solution?",options:["ISE","AMP","Umbrella","Duo"],answer:1},
+  {q:"Cisco Umbrella primarily secures which layer?",options:["L2","L3","DNS","Physical"],answer:2},
+  {q:"What hash is legacy in RIPv2 authentication?",options:["MD5","SHA","HMAC","AES"],answer:0},
+  {q:"Max UDP packet size before fragmentation?",options:["1500 bytes","1024 bytes","512 bytes","64KB"],answer:2},
+  {q:"MPLS VPNs are carried over what?",options:["Public Internet","Private WAN","LTE","Bluetooth"],answer:1},
+  {q:"IKE uses which protocol for negotiation?",options:["ESP","AH","ISAKMP","GRE"],answer:2},
+  {q:"uRPF helps with?",options:["Prevent spoofing","Prevent malware","Encrypt tunnels","QoS"],answer:0},
+  {q:"Posture assessment is done by?",options:["WLC","ISE Posture","Umbrella","AMP"],answer:1},
+];
+
+const quizArea = document.getElementById("quizArea");
+questions.forEach((q,i)=>{
+  let block=document.createElement("div");
+  block.className="question";
+  block.innerHTML=`<h2>Q${i+1}. ${q.q}</h2>`;
+  let opts=document.createElement("div");
+  opts.className="options";
+  q.options.forEach((opt,j)=>{
+    const id=`q${i}_opt${j}`;
+    opts.innerHTML+=`
+      <label><input type="radio" name="q${i}" value="${j}" id="${id}"> ${opt}</label>
+    `;
+  });
+  block.appendChild(opts);
+  quizArea.insertBefore(block,quizArea.querySelector(".btnSubmit"));
+});
+
+// track counts
+const answeredCount=document.getElementById("answeredCount");
+const remainingCount=document.getElementById("remainingCount");
+quizArea.addEventListener("change",()=>{
+  let answered=0;
+  questions.forEach((q,i)=>{
+    if(document.querySelector(`input[name=q${i}]:checked`)) answered++;
+  });
+  answeredCount.textContent=answered;
+  remainingCount.textContent=questions.length-answered;
+});
+
+// finalize
+function finalizeResults(){
+  let correct=0;
+  questions.forEach((q,i)=>{
+    const ans=document.querySelector(`input[name=q${i}]:checked`);
+    if(ans && parseInt(ans.value)===q.answer) correct++;
+  });
+  let percent=Math.round((correct/questions.length)*100);
+  document.getElementById("scoreText").textContent=`Score: ${percent}% (${correct}/${questions.length})`;
+  if(percent>=90){
+    document.getElementById("flagText").textContent="FLAG: True";
+  } else {
+    document.getElementById("flagText").textContent="";
+  }
+  document.getElementById("resultOverlay").classList.add("active");
+}
+
+// disable cheats
+document.addEventListener("contextmenu",e=>e.preventDefault());
+document.addEventListener("keydown",e=>{
+  if(
+    (e.ctrlKey && (e.key.toLowerCase()==='u' || e.key.toLowerCase()==='l')) || // Ctrl+U, Ctrl+L
+    (e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='i') ||                 // Ctrl+Shift+I
+    e.keyCode===123                                                           // F12
+  ){
+    e.preventDefault();
+    alert("🚫 Function disabled in this quiz!");
+  }
+});
+
+// timer
+let timerDuration=25*60;
+const timerBox=document.getElementById("timerBox");
+function updateTimer(sec){
+  const m=Math.floor(sec/60), s=sec%60;
+  timerBox.textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+function startTimer(){
+  let remaining=timerDuration;
+  updateTimer(remaining);
+  const interval=setInterval(()=>{
+    remaining--;
+    if(remaining<=0){
+      clearInterval(interval);
+      updateTimer(0);
+      timerBox.classList.add("timerWarning");
+      alert("⏱️ Time is up! Auto-submitting.");
+      finalizeResults();
+    } else {
+      updateTimer(remaining);
+      if(remaining===120) timerBox.classList.add("timerWarning");
+    }
+  },1000);
+}
+startTimer();
+</script>
+</body>
+</html>
